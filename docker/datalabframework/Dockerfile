@@ -1,4 +1,4 @@
-FROM jupyter/pyspark-notebook
+FROM natbusa/pyspark-notebook
 
 # Only ADD the binder dir, to avoid polluting the cache
 USER root

@@ -1,4 +1,4 @@
-FROM jupyter/pyspark-notebook
+FROM natbusa/pyspark-notebook
 
 # Run the env update in as non-privileged user
 USER $NB_USER
