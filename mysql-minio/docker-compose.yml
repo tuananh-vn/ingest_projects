@@ -118,11 +118,12 @@ services:
     image: minio/mc
     depends_on:
       - minio-1
-      - minio-2
-      - minio-3
-      - minio-4
     entrypoint: >
       /bin/sh -c "
+      echo waiting for minio service to start...;
+      while ! nc -z minio-1 9000 </dev/null; do sleep 10; done;
+      echo minio started;
+      echo creating buckets;
       /usr/bin/mc config host add myminio http://minio-1:9000 minio minio123;
       /usr/bin/mc rm -r --force myminio/ingest;
       /usr/bin/mc mb myminio/ingest;
