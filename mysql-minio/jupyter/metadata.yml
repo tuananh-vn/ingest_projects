@@ -1,0 +1,37 @@
+---
+run: default
+providers:
+    sakila:
+        service: mysql
+        hostname: mysql
+        port: 3306
+        database: sakila
+        username: root
+        password: root
+    ingest:
+        service: minio
+        hostname: minio-1
+        path: ingest/extract
+        format: parquet
+        access: minio
+        secret: minio123
+resources:
+    source:
+        path: actor
+        provider: sakila
+    target:
+        path: sakila.actor
+        provider: ingest
+
+engines:
+    spark:
+        context: spark
+        config:
+            master: spark://spark-master:7077
+            jobname: 'default'
+            packages:
+                - mysql:mysql-connector-java:8.0.12
+loggers:
+    stream:
+        enable: true
+        severity: info

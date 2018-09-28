@@ -66,65 +66,65 @@ services:
       - ./volumes/spark/worker-2/data:/tmp/data
       - ./volumes/spark/worker-2/work:/usr/local/spark/work
 
-  hdfs-nn:
-    image: itrust/hdfs:2.7.1
-    hostname: hdfs-nn
-    command: /run-namenode.sh
+  minio-1:
+    image: minio/minio:RELEASE.2018-09-12T18-49-56Z
     volumes:
-      - ./volumes/hdfs/namenode:/hadoop/dfs/name
-    environment:
-      - CLUSTER_NAME=test
-      - CORE_CONF_fs_defaultFS=hdfs://hdfs-nn:8020
-      - CORE_CONF_hadoop_http_staticuser_user=root
-      - CORE_CONF_hadoop_proxyuser_hue_hosts=*
-      - CORE_CONF_hadoop_proxyuser_hue_groups=*
-      - HDFS_CONF_dfs_webhdfs_enabled=true
-      - HDFS_CONF_dfs_permissions_enabled=false
+      - ./volumes/minio/1/data:/data
+      - ./volumes/minio/1/config:/root/.minio
     ports:
-      - 50070:50070
-      - 8020:8020
-
-  hdfs-dn-1:
-    image: itrust/hdfs:2.7.1
-    links:
-        - hdfs-nn
-    command: /run-datanode.sh
-    volumes:
-      - ./volumes/hdfs/datanode-1:/hadoop/dfs/data-1
+      - "9001:9000"
     environment:
-      - CORE_CONF_fs_defaultFS=hdfs://hdfs-nn:8020
-      - CORE_CONF_hadoop_http_staticuser_user=root
-      - CORE_CONF_hadoop_proxyuser_hue_hosts=*
-      - CORE_CONF_hadoop_proxyuser_hue_groups=*
-      - HDFS_CONF_dfs_webhdfs_enabled=true
-      - HDFS_CONF_dfs_permissions_enabled=false
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    command: server  http://minio-1/data http://minio-2/data http://minio-3/data  http://minio-4/data
 
-  hdfs-dn-2:
-    image: itrust/hdfs:2.7.1
-    links:
-        - hdfs-nn
-    command: /run-datanode.sh
+  minio-2:
+    image: minio/minio:RELEASE.2018-09-12T18-49-56Z
     volumes:
-      - ./volumes/hdfs/datanode-2:/hadoop/dfs/data-2
+      - ./volumes/minio/2/data:/data
+      - ./volumes/minio/2/config:/root/.minio
+    ports:
+      - "9002:9000"
     environment:
-      - CORE_CONF_fs_defaultFS=hdfs://hdfs-nn:8020
-      - CORE_CONF_hadoop_http_staticuser_user=root
-      - CORE_CONF_hadoop_proxyuser_hue_hosts=*
-      - CORE_CONF_hadoop_proxyuser_hue_groups=*
-      - HDFS_CONF_dfs_webhdfs_enabled=true
-      - HDFS_CONF_dfs_permissions_enabled=false
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    command: server  http://minio-1/data http://minio-2/data http://minio-3/data  http://minio-4/data
 
-  hdfs-dn-3:
-    image: itrust/hdfs:2.7.1
-    links:
-        - hdfs-nn
-    command: /run-datanode.sh
+  minio-3:
+    image: minio/minio:RELEASE.2018-09-12T18-49-56Z
     volumes:
-      - ./volumes/hdfs/datanode-3:/hadoop/dfs/data-3
+      - ./volumes/minio/3/data:/data
+      - ./volumes/minio/3/config:/root/.minio
+    ports:
+      - "9003:9000"
     environment:
-      - CORE_CONF_fs_defaultFS=hdfs://hdfs-nn:8020
-      - CORE_CONF_hadoop_http_staticuser_user=root
-      - CORE_CONF_hadoop_proxyuser_hue_hosts=*
-      - CORE_CONF_hadoop_proxyuser_hue_groups=*
-      - HDFS_CONF_dfs_webhdfs_enabled=true
-      - HDFS_CONF_dfs_permissions_enabled=false
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    command: server  http://minio-1/data http://minio-2/data http://minio-3/data  http://minio-4/data
+
+  minio-4:
+    image: minio/minio:RELEASE.2018-09-12T18-49-56Z
+    volumes:
+      - ./volumes/minio/4/data:/data
+      - ./volumes/minio/4/config:/root/.minio
+    ports:
+      - "9004:9000"
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio123
+    command: server  http://minio-1/data http://minio-2/data http://minio-3/data http://minio-4/data
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio-1
+      - minio-2
+      - minio-3
+      - minio-4
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio-1:9000 minio minio123;
+      /usr/bin/mc rm -r --force myminio/ingest;
+      /usr/bin/mc mb myminio/ingest;
+      exit 0;
+      "
