@@ -6,8 +6,9 @@ RUN set -eux; \
     apt-get -y update; \
     apt-get install --no-install-recommends -y \
         openjdk-8-jre-headless \
-        ca-certificates-java;  \
-    apt-get clean; rm -rf /var/lib/apt/lists/*;
+        gnupg ca-certificates-java;  \
+    apt-get clean; rm -rf /var/lib/apt/lists/*; \
+    usermod -aG sudo ${NB_USER}; echo "${NB_USER}:juno" | chpasswd
 
 ENV SPARK_VERSION=2.3.2  \
     HADOOP_VERSION=2.8.5 \
@@ -15,24 +16,31 @@ ENV SPARK_VERSION=2.3.2  \
     HADOOP_HOME=/usr/local/hadoop \
     JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/
 
-ARG APACHE_MIRROR=https://archive.apache.org/dist
+# Some Apache mirror sites:
+#   * https://apache.org/dist
+#   * https://archive.apache.org/dist
+#   * https://dist.apache.org/repos/dist/release
+ARG APACHE_MIRROR=https://dist.apache.org/repos/dist/release
 RUN set -eux; \
     cd /tmp;  \
-    wget "${APACHE_MIRROR}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz"; \
+    wget -qO - "${APACHE_MIRROR}/hadoop/common/KEYS" | gpg --import -; \
+    wget       "${APACHE_MIRROR}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" --progress=bar:force; \
+    wget -qO - "${APACHE_MIRROR}/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz.asc" | gpg --verify - "hadoop-${HADOOP_VERSION}.tar.gz"; \
     tar -xzf "hadoop-${HADOOP_VERSION}.tar.gz" -C /usr/local --owner root --group root --no-same-owner; \
-    rm       "hadoop-${HADOOP_VERSION}.tar.gz"; \
+    rm  -rf  "hadoop-${HADOOP_VERSION}.tar.gz" "$HOME/.gnupg"; \
     cd /usr/local; \
     ln  -s   "hadoop-${HADOOP_VERSION}" hadoop
 
 RUN set -eux; \
     cd /tmp;  \
-    wget "${APACHE_MIRROR}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
-    echo "79D1DE6870CF43ECC059D4423540124610EF00ABC929C171BE42548B505F115906E251E4604ED7D22B6A8CCE012A845D90017319C2ABB3D5D700369B1C335C6D *spark-${SPARK_VERSION}-bin-without-hadoop.tgz" | sha512sum -c -; \
+    wget -qO - "${APACHE_MIRROR}/spark/KEYS" | gpg --import -; \
+    wget       "${APACHE_MIRROR}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz" --progress=bar:force; \
+    wget -qO - "${APACHE_MIRROR}/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-without-hadoop.tgz.asc" | gpg --verify - "spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
     tar -xzf "spark-${SPARK_VERSION}-bin-without-hadoop.tgz" -C /usr/local --owner root --group root --no-same-owner; \
-    rm       "spark-${SPARK_VERSION}-bin-without-hadoop.tgz"; \
+    rm  -rf  "spark-${SPARK_VERSION}-bin-without-hadoop.tgz" "$HOME/.gnupg"; \
     cd /usr/local; \
     ln  -s   "spark-${SPARK_VERSION}-bin-without-hadoop" spark; \
-    echo 'SPARK_DIST_CLASSPATH=$(${HADOOP_HOME}/bin/hadoop classpath)' > ${SPARK_HOME}/conf/spark-env.sh; \
+    echo 'SPARK_DIST_CLASSPATH=$(${HADOOP_HOME}/bin/hadoop classpath)' > "${SPARK_HOME}/conf/spark-env.sh"; \
     chmod +x "${SPARK_HOME}/conf/spark-env.sh"
 
 RUN set -eux; \
@@ -44,8 +52,9 @@ RUN set -eux; \
     wget http://central.maven.org/maven2/com/amazonaws/aws-java-sdk-kms/1.11.234/aws-java-sdk-kms-1.11.234.jar; \
     wget http://central.maven.org/maven2/com/amazonaws/aws-java-sdk-s3/1.11.234/aws-java-sdk-s3-1.11.234.jar
 
-ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.7-src.zip" \
-    SPARK_OPTS="--driver-java-options=-Xms1024M --driver-java-options=-Xmx4096M --driver-java-options=-Dlog4j.logLevel=info"
+ENV SPARK_OPTS="--driver-java-options=-Xms1024M --driver-java-options=-Xmx4096M --driver-java-options=-Dlog4j.logLevel=info" \
+    PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.7-src.zip" \
+    PATH="${SPARK_HOME}/bin:${HADOOP_HOME}/bin:${PATH}"
 
 USER $NB_UID
 
