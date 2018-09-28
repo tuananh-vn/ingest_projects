@@ -33,7 +33,6 @@ services:
       - 7077:7077
       - 8080:8080
     volumes:
-      - ./spark/conf/master:/conf
       - ./volumes/spark/master/data:/tmp/data
 
   spark-worker-1:
