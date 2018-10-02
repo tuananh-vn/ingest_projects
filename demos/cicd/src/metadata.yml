@@ -1,0 +1,29 @@
+---
+run: default
+providers:
+    local_filesystem:
+        service: local
+        path: data
+        format: csv
+resources:
+    ascombe:
+        path: ascombe.csv
+        provider: local_filesystem
+        options:
+            header: True
+            inferSchema: True
+    correlation:
+        path: correlation.csv
+        provider: local_filesystem
+
+engines:
+    spark-local:
+        context: spark
+        config:
+            master: spark://localhost:7077
+            jobname: 'default'
+
+loggers:
+    stream:
+        enable: true
+        severity: info
