@@ -1,0 +1,18 @@
+version: '3'
+services:
+
+  registry:
+    image: registry:2
+    ports: ["5000:5000"]
+    restart: always
+    volumes:
+      - registry:/var/lib/registry
+    networks:
+     - datalabframework
+
+networks:
+  datalabframework:
+    external: true
+
+volumes:
+  registry:

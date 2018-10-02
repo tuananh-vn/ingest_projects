@@ -2,7 +2,11 @@ FROM natbusa/pyspark-notebook
 
 # Only ADD the binder dir, to avoid polluting the cache
 USER root
-COPY binder /home/$NB_USER/binder
+
+RUN mkdir -p /home/$NB_USER/binder
+COPY environment.yml /home/$NB_USER/binder
+
+#fix permissions
 RUN fix-permissions /home/$NB_USER/binder
 
 # Run the env update in as non-privileged user

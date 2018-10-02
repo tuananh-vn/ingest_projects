@@ -1,5 +1,4 @@
 version: '3'
-
 services:
   concourse-db:
     image: postgres
@@ -8,6 +7,8 @@ services:
     - POSTGRES_PASSWORD=concourse_pass
     - POSTGRES_USER=concourse_user
     - PGDATA=/database
+    networks:
+     - datalabframework
 
   concourse:
     image: concourse/concourse
@@ -15,12 +16,20 @@ services:
     privileged: true
     depends_on: [concourse-db]
     ports: ["18080:8080"]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
     - CONCOURSE_POSTGRES_HOST=concourse-db
     - CONCOURSE_POSTGRES_USER=concourse_user
     - CONCOURSE_POSTGRES_PASSWORD=concourse_pass
     - CONCOURSE_POSTGRES_DATABASE=concourse
-    - CONCOURSE_EXTERNAL_URL
+    - CONCOURSE_EXTERNAL_URL=http://localhost:18080
     - CONCOURSE_ADD_LOCAL_USER=test:$$2a$$10$$0W9/ilCpYXY/yCPpaOD.6eCrGda/fnH3D4lhsw1Mze0WTID5BuiTW
     - CONCOURSE_MAIN_TEAM_ALLOW_ALL_USERS=true
     - CONCOURSE_WORKER_GARDEN_NETWORK
+    networks:
+     - datalabframework
+
+networks:
+  datalabframework:
+    external: true
