@@ -66,7 +66,7 @@ case $1 in
     if [ -e $composefile ]
     then
       docker-compose -f $composefile up -d
-      if [ $JUPYTER_CONTAINER = "YES" ]
+      if [ "$JUPYTER_CONTAINER" = "YES" ]
       then
         token=$(docker-compose -f $composefile logs jupyter 2>&1 | grep ?token= | head -n 1 | sed 's/.*token=\(.*\)/\1/')
         sensible-browser http://localhost:8888/lab?token=${token}
