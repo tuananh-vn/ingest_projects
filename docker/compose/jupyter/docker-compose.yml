@@ -1,12 +1,11 @@
 version: '3.5'
 services:
-
-  registry:
-    image: registry:2
-    ports: ["5000:5000"]
-    restart: always
+  jupyter:
+    image: ${REGISTRY}/${USER}/${IMAGE}:${TAG}
+    command: start.sh jupyter lab
     volumes:
-      - registry:/var/lib/registry
+      - ${PROJECT_DIR}:/home/jovyan/demo
+    ports: ["8888:8888"]
     networks:
      - datalabframework
 
@@ -15,6 +14,3 @@ networks:
     name: datalabframework
     driver: bridge
     external: true
-
-volumes:
-  registry:

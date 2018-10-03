@@ -5,6 +5,7 @@ providers:
         service: local
         path: data
         format: csv
+
 resources:
     ascombe:
         path: ascombe.csv
@@ -12,6 +13,7 @@ resources:
         options:
             header: True
             inferSchema: True
+
     correlation:
         path: correlation.csv
         provider: local_filesystem

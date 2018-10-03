@@ -1,6 +1,5 @@
-version: '3'
+version: "3.5"
 services:
-
   init:
     image: hello-world
     networks:
@@ -8,3 +7,5 @@ services:
 
 networks:
   datalabframework:
+    driver: bridge
+    name: datalabframework

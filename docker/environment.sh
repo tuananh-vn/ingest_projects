@@ -36,10 +36,29 @@ case $1 in
     echo compose groups:
     for fn in $(find  $ROOTPATH/compose -name docker-compose.yml); do
       pathname=$(dirname $fn)
+      host_port=$(grep -i ports $fn | sed 's/.*\:[[:space:]]\+\[\"\([[:digit:]]\+\)\:[[:digit:]]\+\"\]/\1/')
+
+      if [ ! -z $host_port ]
+      then
+        if ! nc -zv 127.0.0.1 $host_port 2> /dev/null
+        then
+            port_status='-free-'
+        else
+            port_status='!used!'
+        fi
+        port_info="($port_status) $host_port:"
+      else
+        port_info="             :"
+      fi
+
       prefix=$ROOTPATH/compose/
       groupname=${pathname#$prefix}
-      echo "   " - $groupname
+      echo "   - ${port_info} $groupname"
     done
+    echo
+    echo "Hint:"
+    echo "use 'sudo lsof -n -i :<port number> | grep LISTEN'"
+    echo "to check which process is using the given <port number>"
     retval=0
     ;;
   --up)
@@ -47,6 +66,11 @@ case $1 in
     if [ -e $composefile ]
     then
       docker-compose -f $composefile up -d
+      if [ $JUPYTER_CONTAINER = "YES" ]
+      then
+        token=$(docker-compose -f $composefile logs jupyter 2>&1 | grep ?token= | head -n 1 | sed 's/.*token=\(.*\)/\1/')
+        sensible-browser http://localhost:8888/lab?token=${token}
+      fi
       retval=0
     else
       echo $prefix compose group \'$2\' not found

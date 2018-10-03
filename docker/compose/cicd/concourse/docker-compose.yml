@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 services:
   concourse-db:
     image: postgres
@@ -15,7 +15,7 @@ services:
     command: quickstart
     privileged: true
     depends_on: [concourse-db]
-    ports: ["18080:8080"]
+    ports: ["8088:8080"]
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
@@ -32,4 +32,6 @@ services:
 
 networks:
   datalabframework:
+    name: datalabframework
+    driver: bridge
     external: true
