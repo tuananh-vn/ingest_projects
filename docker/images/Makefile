@@ -10,13 +10,13 @@ all: pyspark-notebook $(DLF)
 
 pyspark-notebook:	pyspark-notebook/Dockerfile
 	$(eval IMAGE = $@)
-	docker build -t $(USER)/$(IMAGE):$(TAG) $@
+	docker build -t $(USER)/$(IMAGE):$(TAG) --build-arg USER=$(USER) $@
 	docker tag $(USER)/$(IMAGE):$(TAG) $(REGISTRY)/$(USER)/$(IMAGE):$(TAG)
 	docker push $(REGISTRY)/$(USER)/$(IMAGE):$(TAG)
 
 $(DLF):	$($(DLF)/Dockerfile)
 	$(eval IMAGE = $@)
-	docker build --no-cache -t $(USER)/$(IMAGE):$(TAG) $@
+	docker build --no-cache -t $(USER)/$(IMAGE):$(TAG) --build-arg USER=$(USER) $@
 	docker tag $(USER)/$(IMAGE):$(TAG) $(REGISTRY)/$(USER)/$(IMAGE):$(TAG)
 	docker push $(REGISTRY)/$(USER)/$(IMAGE):$(TAG)
 

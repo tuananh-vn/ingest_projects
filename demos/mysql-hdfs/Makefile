@@ -7,25 +7,16 @@ TAG ?= latest
 ROOTPATH = $(shell cd ../../ && pwd)
 HERE = $(shell pwd)
 
-init:
+up:
 	$(ROOTPATH)/docker/environment.sh --up network
 	$(ROOTPATH)/docker/environment.sh --up registry
-
-build: init
-	(cd $(ROOTPATH)/docker/images; make)
-
-setup: build
 	# Extra components go HERE
 	$(ROOTPATH)/docker/environment.sh --up mysql
 	$(ROOTPATH)/docker/environment.sh --up hdfs
-
-	REGISTRY=$(REGISTRY) \
-	IMAGE=pyspark-notebook \
-	TAG=$(TAG) \
-	USER=$(USER) \
 	$(ROOTPATH)/docker/environment.sh --up spark
 
-run: setup
+
+run: up
 	REGISTRY=$(REGISTRY) \
 	IMAGE=$(IMAGE) \
 	TAG=$(TAG) \
@@ -43,24 +34,17 @@ stop:
 	JUPYTER_CONTAINER=YES \
 	$(ROOTPATH)/docker/environment.sh --down jupyter
 
-tear: stop
+down: stop
+	$(ROOTPATH)/docker/environment.sh --down registry
+	$(ROOTPATH)/docker/environment.sh --down network
 	#extra demo specific composents go HERE
 	$(ROOTPATH)/docker/environment.sh --down mysql
 	$(ROOTPATH)/docker/environment.sh --down hdfs
-
-	REGISTRY=$(REGISTRY) \
-	IMAGE=pyspark-notebook \
-	TAG=$(TAG) \
-	USER=$(USER) \
 	$(ROOTPATH)/docker/environment.sh --down spark
-
-down: tear
-	$(ROOTPATH)/docker/environment.sh --down registry
-	$(ROOTPATH)/docker/environment.sh --down network
 
 clean:
 	find . -name '.ipynb_checkpoints' -exec rm -rf  {} +
 	find . -name 'spark-warehouse' -exec rm -rf {} +
 
 .DEFAULT_GOAL := run
-.PHONY: init build setup run stop tear down clean
+.PHONY: up run stop down clean
