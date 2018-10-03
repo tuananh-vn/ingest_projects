@@ -13,6 +13,11 @@ up:
 	# Extra components go HERE
 	$(ROOTPATH)/docker/environment.sh --up mysql
 	$(ROOTPATH)/docker/environment.sh --up hdfs
+
+	REGISTRY=$(REGISTRY) \
+	IMAGE=$(IMAGE) \
+	TAG=$(TAG) \
+	USER=$(USER) \
 	$(ROOTPATH)/docker/environment.sh --up spark
 
 
@@ -40,6 +45,11 @@ down: stop
 	#extra demo specific composents go HERE
 	$(ROOTPATH)/docker/environment.sh --down mysql
 	$(ROOTPATH)/docker/environment.sh --down hdfs
+
+	REGISTRY=$(REGISTRY) \
+	IMAGE=$(IMAGE) \
+	TAG=$(TAG) \
+	USER=$(USER) \
 	$(ROOTPATH)/docker/environment.sh --down spark
 
 clean:
