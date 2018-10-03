@@ -3,7 +3,7 @@ run: default
 providers:
     local_filesystem:
         service: local
-        path: data
+        path: ../data
         format: csv
 
 resources:
