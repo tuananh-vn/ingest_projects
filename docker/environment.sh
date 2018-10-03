@@ -68,8 +68,18 @@ case $1 in
       docker-compose -f $composefile up -d
       if [ "$JUPYTER_CONTAINER" = "YES" ]
       then
-        token=$(docker-compose -f $composefile logs jupyter 2>&1 | grep ?token= | head -n 1 | sed 's/.*token=\(.*\)/\1/')
-        sensible-browser http://localhost:8888/lab?token=${token}
+        for I in 1 2 3
+        do
+          log=$(docker-compose -f $composefile logs jupyter 2>&1 | grep ?token= | head -n 1)
+          token=$(echo $log | sed '/token=/!{q100}; {s/.*token=\(.*\)/\1/}')
+          if [ ! "$log" = "$token" ]
+          then
+            sensible-browser http://localhost:8888/lab?token=${token}
+            break;
+          else
+            sleep 5
+          fi
+        done
       fi
       retval=0
     else

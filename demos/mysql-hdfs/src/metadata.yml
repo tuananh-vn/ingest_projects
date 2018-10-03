@@ -29,6 +29,7 @@ engines:
             jobname: 'default'
             packages:
                 - mysql:mysql-connector-java:8.0.12
+
 loggers:
     stream:
         enable: true
