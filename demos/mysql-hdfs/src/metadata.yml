@@ -1,26 +1,36 @@
 ---
 run: default
+
+# new feature - user variables
+variables:
+    a: 5
+    b: '{{ "hello"|env("myvar") }}'
+    
 providers:
-    sakila:
+    source:
         service: mysql
         hostname: mysql
         port: 3306
         database: sakila
         username: root
         password: root
+        read:
+            cache: True
+            repartition: 4
     ingest:
         service: hdfs
         hostname: hdfs-nn
-        path: /data/ingest/extract
+        path: /data/ingest
         format: parquet
-resources:
-    source:
-        path: actor
-        provider: sakila
-    target:
-        path: sakila.actor
-        provider: ingest
-
+        # new feature: read/write options
+        write:
+            repartition: 4
+            coalesce: 2
+            options:
+                partitionBy: 
+                - date
+                mode: append
+            
 engines:
     spark:
         context: spark
@@ -34,3 +44,20 @@ loggers:
     stream:
         enable: true
         severity: info
+
+---
+run: test
+resources:
+    in:
+        path: actor
+        provider: source
+    out:
+        path: actor
+        provider: ingest
+        # override provider settings
+        write:
+            option:
+                partitionBy: 
+                    - date
+                mode: append
+                
