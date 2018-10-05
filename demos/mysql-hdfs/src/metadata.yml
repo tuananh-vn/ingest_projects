@@ -1,11 +1,6 @@
 ---
 run: default
 
-# new feature - user variables
-variables:
-    a: 5
-    b: '{{ "hello"|env("myvar") }}'
-    
 providers:
     source:
         service: mysql
@@ -24,13 +19,24 @@ providers:
         format: parquet
         # new feature: read/write options
         write:
-            repartition: 4
             coalesce: 2
             options:
-                partitionBy: 
-                - date
+                partitionBy: ['date']
                 mode: append
-            
+
+resources:
+    in:
+        path: actor
+        provider: source
+    out:
+        path: actor
+        provider: ingest
+        # override provider settings
+        write:
+            option:
+                partitionBy: ['date']
+                mode: append
+
 engines:
     spark:
         context: spark
@@ -44,20 +50,3 @@ loggers:
     stream:
         enable: true
         severity: info
-
----
-run: test
-resources:
-    in:
-        path: actor
-        provider: source
-    out:
-        path: actor
-        provider: ingest
-        # override provider settings
-        write:
-            option:
-                partitionBy: 
-                    - date
-                mode: append
-                
