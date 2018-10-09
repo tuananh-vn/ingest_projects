@@ -14,38 +14,98 @@ resources:
         path: keywords.csv
         provider: local_filesystem
         read:
+            mapping:
+                abc: 
+                    name: cds
+                    type: text
+                    fields:
+                        keyword:
+                            type: keyword
+                            ignore_above: 256
+                        
+                    fill: value
+                    drop: true
+                     
+                    
+                    
             options:
                 header: True
                 inferSchema: True
     keywords_search:
-        privider: elastic_test
+        provider: elastic_test
         #index: search_keywords_dev
-        path: /product_catalog_dev/_search
+        path: /search_keywords_dev/keyword/
+        action: _search
         query: >
             {
-                "query": {
-                    "match_all": {}
+              "size" : [[_size]],
+              "from" : [[_from]],
+              "query": {
+                "function_score": {
+                  "query": {
+                      "match" : {
+                        "query_wo_tones": {"query":"[[_query]]", "operator" :"or", "fuzziness":"AUTO"}
+                    }
+                  },
+                  "script_score" : {
+                      "script" : {
+                        "source": "Math.sqrt(doc['impressions'].value)"
+                      }
+                  },
+                  "boost_mode":"multiply"
                 }
+              }
             }
             
     keywords_elk:
         provider: elastic_test
         index: search_keywords_dev
-        settings: >
-            {
-                "index": {
-                    "number_of_shards": 1,
-                    "number_of_replicas": 2,
-                    "mapping": {
-                        "total_fields": {
-                            "limit": "100000"
+        settings:
+            index: 
+                number_of_shards: 1
+                number_of_replicas: 3
+                mapping: 
+                    total_fields:
+                        limit: 1024
+        mappings: 
+            doc_type: keyword 
+            properties:
+                api_result: integer
+                count: integer
+                gg: integer
+                gg_clicks: double
+                gg_impressions: double
+                gg_position: double
+                pv: integer
+                pv_impressions: double
+                pv_position: double
+                pv_result: double
+                query: 
+                    type: text
+                    fields:
+                        keyword:
+                            type: keyword
+                            ignore_above: 256
+                query_wo_tones: 
+                    type: text
+                    fields:
+                        keyword:
+                            type: keyword
+                            ignore_above: 256
+                            
+            settings_bak: >
+                {
+                    "index": {
+                        "number_of_shards": 1,
+                        "number_of_replicas": 2,
+                        "mapping": {
+                            "total_fields": {
+                                "limit": "100000"
+                            }
                         }
                     }
                 }
-            }
-        mappings: 
-            doc_type: keyword 
-            properties: >
+            properties_bak: >
                 {
                     "api_result": {
                         "type": "double"
