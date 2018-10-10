@@ -2,7 +2,7 @@ version: '3.5'
 services:
 
   spark-master:
-    image: ${REGISTRY}/${USER}/${IMAGE}:${TAG}
+    image: ${REGISTRY}/${USERNAME}/${IMAGENAME}:${IMAGETAG}
     command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master -h spark-master
     hostname: spark-master
     user: root
@@ -19,7 +19,7 @@ services:
      - datalabframework
 
   spark-worker-1:
-    image: ${REGISTRY}/${USER}/${IMAGE}:${TAG}
+    image: ${REGISTRY}/${USERNAME}/${IMAGENAME}:${IMAGETAG}
     command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     hostname: spark-worker-1
     user: root
@@ -32,13 +32,13 @@ services:
       SPARK_PUBLIC_DNS: localhost
     volumes:
       - ./conf/worker:/conf
-    ports: 
+    ports:
       - 8081:8081
     networks:
      - datalabframework
 
   spark-worker-2:
-    image: ${REGISTRY}/${USER}/${IMAGE}:${TAG}
+    image: ${REGISTRY}/${USERNAME}/${IMAGENAME}:${IMAGETAG}
     command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     hostname: spark-worker-2
     user: root

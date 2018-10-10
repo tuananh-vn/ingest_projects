@@ -10,9 +10,10 @@ resources:
     ascombe:
         path: ascombe.csv
         provider: local_filesystem
-        options:
-            header: True
-            inferSchema: True
+        read:
+            options:
+                header: True
+                inferSchema: True
 
     correlation:
         path: correlation.csv

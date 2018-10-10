@@ -16,12 +16,12 @@ then
 fi
 
 # first argument is empty, or incorrect # of arguments hint for help
-if [ $# -eq 0 ] || [ "$3" ]; then
+if [ $# -eq 0 ] || [ "$4" ]; then
   echo $prefix "type '$0 -h' for help"
   exit 1
 fi
 
-ROOTPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+ROOTPATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )"/.. >/dev/null && pwd )"
 
 # first argument is -h or empty, display help
 case $1 in
@@ -34,26 +34,11 @@ case $1 in
   --list)
     echo $prefix
     echo compose groups:
-    for fn in $(find  $ROOTPATH/compose -name docker-compose.yml); do
+    for fn in $(find  $ROOTPATH/docker/compose -name docker-compose.yml); do
       pathname=$(dirname $fn)
-      host_port=$(grep -i ports $fn | sed 's/.*\:[[:space:]]\+\[\"\([[:digit:]]\+\)\:[[:digit:]]\+\"\]/\1/')
-
-      if [ ! -z $host_port ]
-      then
-        if ! nc -zv 127.0.0.1 $host_port 2> /dev/null
-        then
-            port_status='-free-'
-        else
-            port_status='!used!'
-        fi
-        port_info="($port_status) $host_port:"
-      else
-        port_info="             :"
-      fi
-
-      prefix=$ROOTPATH/compose/
+      prefix=$ROOTPATH/docker/compose/
       groupname=${pathname#$prefix}
-      echo "   - ${port_info} $groupname"
+      echo "   - $groupname"
     done
     echo
     echo "Hint:"
@@ -62,11 +47,26 @@ case $1 in
     retval=0
     ;;
   --up)
-    composefile=$ROOTPATH/compose/$2/docker-compose.yml
+    composefile=$ROOTPATH/docker/compose/$2/docker-compose.yml
     if [ -e $composefile ]
     then
+      REGISTRY=${REGISTRY:='localhost:5000'} \
+      USERNAME=${USERNAME:=${USER}} \
+      IMAGENAME=${IMAGENAME:=datalabframework} \
+      IMAGETAG=${IMAGETAG:=latest} \
+      PROJECTDIR=${PROJECTDIR:=$(pwd)} \
       docker-compose -f $composefile up -d
-      if [ "$JUPYTER_CONTAINER" = "YES" ]
+      retval=0
+    else
+      echo $prefix compose group \'$2\' not found
+      retval=1
+    fi
+    ;;
+  --interactive)
+    composefile=$ROOTPATH/docker/compose/$2/docker-compose.yml
+    if [ -e $composefile ]
+    then
+      if [ "$2" = "jupyter" ]
       then
         for I in 1 2 3
         do
@@ -87,10 +87,28 @@ case $1 in
       retval=1
     fi
     ;;
-  --down)
-    composefile=$ROOTPATH/compose/$2/docker-compose.yml
+  --exec)
+    composefile=$ROOTPATH/docker/compose/$2/docker-compose.yml
     if [ -e $composefile ]
     then
+        REGISTRY=${REGISTRY:='localhost:5000'} \
+        USERNAME=${USERNAME:=${USER}} \
+        IMAGENAME=${IMAGENAME:=datalabframework} \
+        IMAGETAG=${IMAGETAG:=latest} \
+        PROJECTDIR=${PROJECTDIR:=$(pwd)} \
+        docker-compose -f $composefile exec $2 /bin/bash -c "$3"
+        #'cd /home/$NB_USER/demo/test && make'
+    fi
+    ;;
+  --down)
+    composefile=$ROOTPATH/docker/compose/$2/docker-compose.yml
+    if [ -e $composefile ]
+    then
+      REGISTRY=${REGISTRY:='localhost:5000'} \
+      USERNAME=${USERNAME:=${USER}} \
+      IMAGENAME=${IMAGENAME:=datalabframework} \
+      IMAGETAG=${IMAGETAG:=latest} \
+      PROJECTDIR=${PROJECTDIR:=$(pwd)} \
       docker-compose -f $composefile down
       retval=0
     else

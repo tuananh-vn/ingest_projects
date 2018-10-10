@@ -1,43 +1,43 @@
 SHELL=/bin/bash
 
-REGISTRY ?= localhost:5000
-IMAGE ?=datalabframework
-TAG ?= latest
-
+DEMOPATH = $(shell cd demo && pwd)
 ROOTPATH = $(shell cd ../../ && pwd)
-HERE = $(shell pwd)
 
 up:
+	# minimal setup
 	$(ROOTPATH)/docker/environment.sh --up network
 	$(ROOTPATH)/docker/environment.sh --up registry
-	# Extra components go HERE
+
+	# create the datalabframework image if required
+	cd $(ROOTPATH)/docker/images && make
+
+	# >> extra components go here <<
+
+	# start jupyter
+	PROJECTDIR=$(DEMOPATH) $(ROOTPATH)/docker/environment.sh --up jupyter
 
 run: up
-	REGISTRY=$(REGISTRY) \
-	IMAGE=$(IMAGE) \
-	TAG=$(TAG) \
-	USER=$(USER) \
-	PROJECT_DIR=$(HERE) \
-	JUPYTER_CONTAINER=YES \
-	$(ROOTPATH)/docker/environment.sh --up jupyter
+	$(ROOTPATH)/docker/environment.sh --interactive jupyter
 
-stop:
-	REGISTRY=$(REGISTRY) \
-	IMAGE=$(IMAGE) \
-	TAG=$(TAG) \
-	USER=$(USER) \
-	PROJECT_DIR=$(HERE) \
-	JUPYTER_CONTAINER=YES \
+test:
+	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo/test && make'
+
+regression:
+		make up
+		make test
+		make down
+		make clean
+
+down:
+	# >> extra components go here <<
 	$(ROOTPATH)/docker/environment.sh --down jupyter
-
-down: stop
 	$(ROOTPATH)/docker/environment.sh --down registry
 	$(ROOTPATH)/docker/environment.sh --down network
-	#extra demo specific composents go HERE
 
 clean:
-	find . -name '.ipynb_checkpoints' -exec rm -rf  {} +
-	find . -name 'spark-warehouse' -exec rm -rf {} +
+	find $(DEMOPATH) -name '.ipynb_checkpoints' -exec rm -rf  {} +
+	find $(DEMOPATH) -name 'spark-warehouse' -exec rm -rf {} +
+	rm -rf $(DEMOPATH)/data/correlation.csv
 
 .DEFAULT_GOAL := run
-.PHONY: up run stop down clean
+.PHONY: run test regression up down clean

@@ -1,10 +1,10 @@
 version: '3.5'
 services:
   jupyter:
-    image: ${REGISTRY}/${USER}/${IMAGE}:${TAG}
+    image: ${REGISTRY}/${USERNAME}/${IMAGENAME}:${IMAGETAG}
     command: start.sh jupyter lab
     volumes:
-      - ${PROJECT_DIR}:/home/jovyan/demo
+      - ${PROJECTDIR}:/home/jovyan/demo
     ports: ["8888:8888"]
     networks:
      - datalabframework
