@@ -21,6 +21,7 @@ run: up
 
 test:
 	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo/test && make'
+	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo/test && make clean'
 
 regression:
 		make up
@@ -33,11 +34,6 @@ down:
 	$(ROOTPATH)/docker/environment.sh --down jupyter
 	$(ROOTPATH)/docker/environment.sh --down registry
 	$(ROOTPATH)/docker/environment.sh --down network
-
-clean:
-	find $(DEMOPATH) -name '.ipynb_checkpoints' -exec rm -rf  {} +
-	find $(DEMOPATH) -name 'spark-warehouse' -exec rm -rf {} +
-	rm -rf $(DEMOPATH)/data/correlation.csv
 
 .DEFAULT_GOAL := run
 .PHONY: run test regression up down clean

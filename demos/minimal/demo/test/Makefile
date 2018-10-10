@@ -1,14 +1,14 @@
 SHELL=/bin/bash
 
-DEMOPATH = $(shell cd .. && pwd)
-ROOTPATH = $(shell cd $(DEMOPATH)/../../ && pwd)
+PROJECT_ROOTPATH = $(shell cd .. && pwd)
 
 demo:
-	datalabframework run $(DEMOPATH)/src/main.ipynb
+	datalabframework run $(PROJECT_ROOTPATH)/src/main.ipynb
 
 clean:
-	find . -name '.ipynb_checkpoints' -exec rm -rf  {} +
-	find . -name 'spark-warehouse' -exec rm -rf {} +
+	find $(PROJECT_ROOTPATH) -name '.ipynb_checkpoints' -exec rm -rf  {} +
+	find $(PROJECT_ROOTPATH) -name 'spark-warehouse' -exec rm -rf {} +
+	rm -rf $(PROJECT_ROOTPATH)/data/correlation.csv
 
 .DEFAULT_GOAL := demo
 .PHONY: demo clean
