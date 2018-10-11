@@ -19,7 +19,7 @@ up:
 run: up
 	$(ROOTPATH)/docker/environment.sh --interactive jupyter
 
-test:
+test: up
 	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo/test && make'
 	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo/test && make clean'
 

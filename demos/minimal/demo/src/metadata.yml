@@ -1,19 +1,23 @@
 ---
-run: default
+profile: default
 providers:
     local_filesystem:
         service: local
         path: ../data
         format: csv
+        read:
+            options:
+                header: True
+                inferSchema: True
+        write:
+            options:
+                header: True
+                mode: overwrite
 
 resources:
     ascombe:
         path: ascombe.csv
         provider: local_filesystem
-        read:
-            options:
-                header: True
-                inferSchema: True
 
     correlation:
         path: correlation.csv

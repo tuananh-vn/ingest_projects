@@ -63,19 +63,9 @@ RUN set -eux; \
     fix-permissions $CONDA_DIR; \
     fix-permissions /home/$NB_USER
 
-# Only ADD the binder dir, to avoid polluting the cache
-USER root
-
-RUN mkdir -p /home/$NB_USER/binder
-COPY environment.yml /home/$NB_USER/binder
-
-#fix permissions
-RUN fix-permissions /home/$NB_USER/binder
-
-# Run the env update in as non-privileged user
 USER $NB_UID
 
-RUN conda env update -n base -f /home/$NB_USER/binder/environment.yml
+RUN pip install git+https://github.com/natbusa/datalabframework.git
 
 RUN conda clean -tipsy && \
         fix-permissions $CONDA_DIR && \
