@@ -1,5 +1,18 @@
 ---
 run: default
+
+engines:
+    spark-local:
+        context: spark
+        config:
+            master: local[*]
+            jobname: 'default'
+
+loggers:
+    stream:
+        enable: true
+        severity: info
+
 providers:
     local_filesystem:
         service: local
@@ -33,8 +46,8 @@ resources:
                 inferSchema: True
     keywords_search:
         provider: elastic_test
-        #index: search_keywords_dev
-        path: /search_keywords_dev/keyword/
+        #index: search_keywords_dev2
+        path: /search_keywords_dev2/keyword/
         action: _search
         query: >
             {
@@ -59,7 +72,7 @@ resources:
             
     keywords_elk:
         provider: elastic_test
-        index: search_keywords_dev
+        index: search_keywords_dev2
         settings:
             index: 
                 number_of_shards: 1
@@ -156,18 +169,3 @@ resources:
                         }
                     }
                 }
-                
-
-engines:
-    spark-local:
-        context: spark
-        config:
-            master: local[*]
-            jobname: 'default'
-    elastic:
-        context: elastic
-
-loggers:
-    stream:
-        enable: true
-        severity: info
