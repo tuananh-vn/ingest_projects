@@ -20,8 +20,8 @@ run: up
 	$(ROOTPATH)/docker/environment.sh --interactive jupyter
 
 test: up
-	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo/test && make'
-	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo/test && make clean'
+	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo && make'
+	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo && make clean'
 
 regression:
 		make up
