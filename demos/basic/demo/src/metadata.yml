@@ -1,0 +1,36 @@
+---
+profile: default
+providers:
+    local_filesystem:
+        service: local
+        path: ../data
+        format: csv
+        read:
+            options:
+                header: True
+                inferSchema: True
+        write:
+            options:
+                header: True
+                mode: overwrite
+
+resources:
+    ascombe:
+        path: ascombe.csv
+        provider: local_filesystem
+
+    correlation:
+        path: correlation.csv
+        provider: local_filesystem
+
+engines:
+    spark-local:
+        context: spark
+        config:
+            master: local[*]
+            jobname: 'default'
+
+loggers:
+    stream:
+        enable: true
+        severity: info

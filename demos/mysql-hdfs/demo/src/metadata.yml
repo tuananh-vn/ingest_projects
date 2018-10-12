@@ -1,0 +1,68 @@
+---
+profile: default
+
+# application specific variables
+# can be set to be run dependent
+
+variables:
+    a: 5
+    b: '{{ "hello"|env("myvar") }}'
+
+providers:
+    source:
+        service: mysql
+        hostname: mysql
+        port: 3306
+        database: sakila
+        username: root
+        password: root
+        read:
+            cache: True
+            repartition: 4
+    ingest:
+        service: hdfs
+        hostname: hdfs-nn
+        path: /data/ingest
+        format: parquet
+        # new feature: read/write options
+        write:
+            coalesce: 2
+            options:
+                partitionBy: ['date']
+                mode: append
+
+engines:
+    spark:
+        context: spark
+        config:
+            master: local[*]
+            packages:
+                - mysql:mysql-connector-java:8.0.12
+
+resources:
+    in:
+        path: actor
+        provider: source
+    out:
+        path: actor
+        provider: ingest
+        # override provider settings
+        write:
+            option:
+                partitionBy: ['date']
+                mode: append
+
+loggers:
+    stream:
+        enable: true
+        severity: info
+
+---
+profile: cluster
+engines:
+    spark:
+        context: spark
+        config:
+            master: spark://spark-master:7077
+            packages:
+                - mysql:mysql-connector-java:8.0.12

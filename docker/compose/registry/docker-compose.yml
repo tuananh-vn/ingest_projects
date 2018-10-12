@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 services:
 
   registry:
@@ -12,6 +12,8 @@ services:
 
 networks:
   datalabframework:
+    name: datalabframework
+    driver: bridge
     external: true
 
 volumes:

@@ -2,19 +2,16 @@ SHELL=/bin/bash
 
 # default uses an insecure local registry
 REGISTRY ?= localhost:5000
-TAG ?= latest
+USERNAME ?= $(USER)
+IMAGETAG ?= latest
 
-DIRS = pyspark-notebook \
-			 datalabframework \
-			 datalabframework-develop
+all: datalabframework
 
-all: $(DIRS)
+datalabframework:	datalabframework/Dockerfile
+	$(eval IMAGENAME = $@)
+	docker build -t $(USERNAME)/$(IMAGENAME):$(IMAGETAG) $@
+	docker tag $(USERNAME)/$(IMAGENAME):$(IMAGETAG) $(REGISTRY)/$(USERNAME)/$(IMAGENAME):$(IMAGETAG)
+	docker push $(REGISTRY)/$(USERNAME)/$(IMAGENAME):$(IMAGETAG)
 
-$(DIRS):	$($(DIRS)/Dockerfile)
-	$(eval IMAGE = $@)
-	docker build -t $(USER)/$(IMAGE):$(TAG) $@
-	docker tag $(USER)/$(IMAGE):$(TAG) $(REGISTRY)/$(USER)/$(IMAGE):$(TAG)
-	docker push $(REGISTRY)/$(USER)/$(IMAGE):$(TAG)
-
-.PHONY: all $(DIRS)
+.PHONY: all datalabframework
 .DEFAULT_GOAL := all

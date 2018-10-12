@@ -12,6 +12,9 @@ up:
 	cd $(ROOTPATH)/docker/images && make
 
 	# >> extra components go here <<
+	$(ROOTPATH)/docker/environment.sh --up mysql
+	$(ROOTPATH)/docker/environment.sh --up hdfs
+	$(ROOTPATH)/docker/environment.sh --up spark
 
 	# start jupyter
 	PROJECTDIR=$(DEMOPATH) $(ROOTPATH)/docker/environment.sh --up jupyter
@@ -20,8 +23,8 @@ run: up
 	$(ROOTPATH)/docker/environment.sh --interactive jupyter
 
 test: up
-	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo && make'
-	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo && make clean'
+	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo/test && make'
+	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo/test && make clean'
 
 regression:
 		make test
@@ -29,8 +32,11 @@ regression:
 		make clean
 
 down:
-	# >> extra components go here <<
 	$(ROOTPATH)/docker/environment.sh --down jupyter
+	# >> extra components go here <<
+	$(ROOTPATH)/docker/environment.sh --down mysql
+	$(ROOTPATH)/docker/environment.sh --down hdfs
+	$(ROOTPATH)/docker/environment.sh --down spark
 	$(ROOTPATH)/docker/environment.sh --down registry
 	$(ROOTPATH)/docker/environment.sh --down network
 

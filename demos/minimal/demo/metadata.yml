@@ -1,0 +1,13 @@
+---
+profile: default
+
+engines:
+    spark-local:
+        context: spark
+        config:
+            master: local[*]
+
+loggers:
+    stream:
+        enable: true
+        severity: info
