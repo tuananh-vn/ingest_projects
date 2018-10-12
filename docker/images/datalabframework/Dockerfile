@@ -66,7 +66,6 @@ RUN set -eux; \
 USER $NB_UID
 
 RUN pip install git+https://github.com/natbusa/datalabframework.git
-RUN conda install gitpython
 
 RUN conda clean -tipsy && \
         fix-permissions $CONDA_DIR && \
