@@ -1,5 +1,5 @@
 ---
-run: default
+profile: default
 
 engines:
     spark-local:
@@ -9,9 +9,10 @@ engines:
             jobname: 'default'
 
 loggers:
+    severity: info
     stream:
         enable: true
-        severity: info
+        
 
 providers:
     local_filesystem:
@@ -48,124 +49,129 @@ resources:
         provider: elastic_test
         #index: search_keywords_dev2
         path: /search_keywords_dev2/keyword/
-        action: _search
-        query: >
-            {
-              "size" : [[_size]],
-              "from" : [[_from]],
-              "query": {
-                "function_score": {
-                  "query": {
-                      "match" : {
-                        "query_wo_tones": {"query":"[[_query]]", "operator" :"or", "fuzziness":"AUTO"}
-                    }
-                  },
-                  "script_score" : {
-                      "script" : {
-                        "source": "Math.sqrt(doc['impressions'].value)"
+        read:
+            options:
+                action: _search
+                query: >
+                    {
+                      "size" : [[_size]],
+                      "from" : [[_from]],
+                      "query": {
+                        "function_score": {
+                          "query": {
+                              "match" : {
+                                "query_wo_tones": {"query":"[[_query]]", "operator" :"or", "fuzziness":"AUTO"}
+                            }
+                          },
+                          "script_score" : {
+                              "script" : {
+                                "source": "Math.sqrt(doc['impressions'].value)"
+                              }
+                          },
+                          "boost_mode":"multiply"
+                        }
                       }
-                  },
-                  "boost_mode":"multiply"
-                }
-              }
-            }
+                    }
             
     keywords_elk:
         provider: elastic_test
-        index: search_keywords_dev2
-        settings:
-            index: 
-                number_of_shards: 1
-                number_of_replicas: 3
-                mapping: 
-                    total_fields:
-                        limit: 1024
-        mappings: 
-            doc_type: keyword 
-            properties:
-                api_result: integer
-                count: integer
-                gg: integer
-                gg_clicks: double
-                gg_impressions: double
-                gg_position: double
-                pv: integer
-                pv_impressions: double
-                pv_position: double
-                pv_result: double
-                query: 
-                    type: text
-                    fields:
-                        keyword:
-                            type: keyword
-                            ignore_above: 256
-                query_wo_tones: 
-                    type: text
-                    fields:
-                        keyword:
-                            type: keyword
-                            ignore_above: 256
-                            
-            settings_bak: >
-                {
-                    "index": {
-                        "number_of_shards": 1,
-                        "number_of_replicas": 2,
-                        "mapping": {
-                            "total_fields": {
-                                "limit": "100000"
+        # path = elastic index
+        path: search_keywords_dev2
+        write:
+            options:
+                settings:
+                    index: 
+                        number_of_shards: 1
+                        number_of_replicas: 3
+                        mapping: 
+                            total_fields:
+                                limit: 1024
+                mappings: 
+                    doc_type: keyword 
+                    properties:
+                        api_result: integer
+                        count: integer
+                        gg: integer
+                        gg_clicks: double
+                        gg_impressions: double
+                        gg_position: double
+                        pv: integer
+                        pv_impressions: double
+                        pv_position: double
+                        pv_result: double
+                        query: 
+                            type: text
+                            fields:
+                                keyword:
+                                    type: keyword
+                                    ignore_above: 256
+                        query_wo_tones: 
+                            type: text
+                            fields:
+                                keyword:
+                                    type: keyword
+                                    ignore_above: 256
+
+                    settings_bak: >
+                        {
+                            "index": {
+                                "number_of_shards": 1,
+                                "number_of_replicas": 2,
+                                "mapping": {
+                                    "total_fields": {
+                                        "limit": "100000"
+                                    }
+                                }
                             }
                         }
-                    }
-                }
-            properties_bak: >
-                {
-                    "api_result": {
-                        "type": "double"
-                    },
-                    "count": {
-                        "type": "integer"
-                    },
-                    "gg": {
-                        "type": "integer"
-                    },
-                    "gg_clicks": {
-                        "type": "double"
-                    },
-                    "gg_impressions": {
-                        "type": "double"
-                    },
-                    "gg_position": {
-                        "type": "double"
-                    },
-                    "pv": {
-                        "type": "integer"
-                    },
-                    "pv_impressions": {
-                        "type": "double"
-                    },
-                    "pv_position": {
-                        "type": "double"
-                    },
-                    "pv_result": {
-                        "type": "double"
-                    },
-                    "query": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
+                    properties_bak: >
+                        {
+                            "api_result": {
+                                "type": "double"
+                            },
+                            "count": {
+                                "type": "integer"
+                            },
+                            "gg": {
+                                "type": "integer"
+                            },
+                            "gg_clicks": {
+                                "type": "double"
+                            },
+                            "gg_impressions": {
+                                "type": "double"
+                            },
+                            "gg_position": {
+                                "type": "double"
+                            },
+                            "pv": {
+                                "type": "integer"
+                            },
+                            "pv_impressions": {
+                                "type": "double"
+                            },
+                            "pv_position": {
+                                "type": "double"
+                            },
+                            "pv_result": {
+                                "type": "double"
+                            },
+                            "query": {
+                                "type": "text",
+                                "fields": {
+                                    "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 256
+                                    }
+                                }
+                            },
+                            "query_wo_tones": {
+                                "type": "text",
+                                "fields": {
+                                    "keyword": {
+                                        "type": "keyword",
+                                        "ignore_above": 256
+                                    }
+                                }
                             }
                         }
-                    },
-                    "query_wo_tones": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword",
-                                "ignore_above": 256
-                            }
-                        }
-                    }
-                }
