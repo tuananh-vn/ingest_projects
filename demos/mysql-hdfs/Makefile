@@ -1,60 +1,44 @@
 SHELL=/bin/bash
 
-REGISTRY ?= localhost:5000
-IMAGE ?=datalabframework
-TAG ?= latest
-
+DEMOPATH = $(shell cd demo && pwd)
 ROOTPATH = $(shell cd ../../ && pwd)
-HERE = $(shell pwd)
 
 up:
+	# minimal setup
 	$(ROOTPATH)/docker/environment.sh --up network
 	$(ROOTPATH)/docker/environment.sh --up registry
-	# Extra components go HERE
+
+	# create the datalabframework image if required
+	cd $(ROOTPATH)/docker/images && make
+
+	# >> extra components go here <<
 	$(ROOTPATH)/docker/environment.sh --up mysql
 	$(ROOTPATH)/docker/environment.sh --up hdfs
-
-	REGISTRY=$(REGISTRY) \
-	IMAGE=$(IMAGE) \
-	TAG=$(TAG) \
-	USER=$(USER) \
 	$(ROOTPATH)/docker/environment.sh --up spark
 
+	# start jupyter
+	PROJECTDIR=$(DEMOPATH) $(ROOTPATH)/docker/environment.sh --up jupyter
 
 run: up
-	REGISTRY=$(REGISTRY) \
-	IMAGE=$(IMAGE) \
-	TAG=$(TAG) \
-	USER=$(USER) \
-	PROJECT_DIR=$(HERE) \
-	JUPYTER_CONTAINER=YES \
-	$(ROOTPATH)/docker/environment.sh --up jupyter
+	$(ROOTPATH)/docker/environment.sh --interactive jupyter
 
-stop:
-	REGISTRY=$(REGISTRY) \
-	IMAGE=$(IMAGE) \
-	TAG=$(TAG) \
-	USER=$(USER) \
-	PROJECT_DIR=$(HERE) \
-	JUPYTER_CONTAINER=YES \
+test: up
+	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo/test && make'
+	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo/test && make clean'
+
+regression:
+		make test
+		make down
+		make clean
+
+down:
 	$(ROOTPATH)/docker/environment.sh --down jupyter
-
-down: stop
-	$(ROOTPATH)/docker/environment.sh --down registry
-	$(ROOTPATH)/docker/environment.sh --down network
-	#extra demo specific composents go HERE
+	# >> extra components go here <<
 	$(ROOTPATH)/docker/environment.sh --down mysql
 	$(ROOTPATH)/docker/environment.sh --down hdfs
-
-	REGISTRY=$(REGISTRY) \
-	IMAGE=$(IMAGE) \
-	TAG=$(TAG) \
-	USER=$(USER) \
 	$(ROOTPATH)/docker/environment.sh --down spark
-
-clean:
-	find . -name '.ipynb_checkpoints' -exec rm -rf  {} +
-	find . -name 'spark-warehouse' -exec rm -rf {} +
+	$(ROOTPATH)/docker/environment.sh --down registry
+	$(ROOTPATH)/docker/environment.sh --down network
 
 .DEFAULT_GOAL := run
-.PHONY: up run stop down clean
+.PHONY: run test regression up down clean

@@ -110,6 +110,13 @@ case $1 in
       IMAGETAG=${IMAGETAG:=latest} \
       PROJECTDIR=${PROJECTDIR:=$(pwd)} \
       docker-compose -f $composefile down
+
+      REGISTRY=${REGISTRY:='localhost:5000'} \
+      USERNAME=${USERNAME:=${USER}} \
+      IMAGENAME=${IMAGENAME:=datalabframework} \
+      IMAGETAG=${IMAGETAG:=latest} \
+      PROJECTDIR=${PROJECTDIR:=$(pwd)} \
+      docker-compose -f $composefile rm
       retval=0
     else
       echo $prefix compose group \'$2\' not found

@@ -5,7 +5,10 @@ services:
     command: start.sh jupyter lab
     volumes:
       - ${PROJECTDIR}:/home/jovyan/demo
+      - ./conf:/conf
     ports: ["8888:8888"]
+    environment:
+      SPARK_CONF_DIR: /conf
     networks:
      - datalabframework
 

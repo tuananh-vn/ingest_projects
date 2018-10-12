@@ -63,14 +63,12 @@ RUN set -eux; \
     fix-permissions $CONDA_DIR; \
     fix-permissions /home/$NB_USER
 
-USER $NB_UID
-
-RUN pip install git+https://github.com/natbusa/datalabframework.git
-RUN conda install gitpython
 
 RUN conda clean -tipsy && \
         fix-permissions $CONDA_DIR && \
         fix-permissions /home/$NB_USER
+
+RUN pip install git+https://github.com/natbusa/datalabframework.git
 
 # Ready to go: switch to user $NB_USER
 USER $NB_USER

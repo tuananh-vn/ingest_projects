@@ -24,14 +24,13 @@ test: up
 	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo/test && make clean'
 
 regression:
-		make up
 		make test
 		make down
 		make clean
 
 down:
-	# >> extra components go here <<
 	$(ROOTPATH)/docker/environment.sh --down jupyter
+	# >> extra components go here <<
 	$(ROOTPATH)/docker/environment.sh --down registry
 	$(ROOTPATH)/docker/environment.sh --down network
 

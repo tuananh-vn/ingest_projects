@@ -1,5 +1,12 @@
 ---
-run: default
+profile: default
+
+# application specific variables
+# can be set to be run dependent
+
+variables:
+    a: 5
+    b: '{{ "hello"|env("myvar") }}'
 
 providers:
     source:
@@ -24,6 +31,14 @@ providers:
                 partitionBy: ['date']
                 mode: append
 
+engines:
+    spark:
+        context: spark
+        config:
+            master: local[*]
+            packages:
+                - mysql:mysql-connector-java:8.0.12
+
 resources:
     in:
         path: actor
@@ -37,16 +52,17 @@ resources:
                 partitionBy: ['date']
                 mode: append
 
+loggers:
+    stream:
+        enable: true
+        severity: info
+
+---
+profile: cluster
 engines:
     spark:
         context: spark
         config:
             master: spark://spark-master:7077
-            jobname: 'default'
             packages:
                 - mysql:mysql-connector-java:8.0.12
-
-loggers:
-    stream:
-        enable: true
-        severity: info

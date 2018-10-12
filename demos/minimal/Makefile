@@ -24,7 +24,6 @@ test: up
 	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo && make clean'
 
 regression:
-		make up
 		make test
 		make down
 		make clean
