@@ -1,6 +1,11 @@
 ---
 profile: default
 
+variables:
+    size: 1
+    from: 0
+    query: "laptop"
+
 engines:
     spark-local:
         context: spark
@@ -52,15 +57,18 @@ resources:
         read:
             options:
                 action: _search
-                query: >
+                query:
                     {
-                      "size" : [[_size]],
-                      "from" : [[_from]],
+                      "size" : "{{ default.variables.size }}",
+                      "from" : "{{ default.variables.from }}",
                       "query": {
                         "function_score": {
                           "query": {
                               "match" : {
-                                "query_wo_tones": {"query":"[[_query]]", "operator" :"or", "fuzziness":"AUTO"}
+                                "query_wo_tones": {
+                                    "query": "{{ default.variables.query }}", 
+                                    "operator" :"or", 
+                                    "fuzziness":"AUTO"}
                             }
                           },
                           "script_score" : {
