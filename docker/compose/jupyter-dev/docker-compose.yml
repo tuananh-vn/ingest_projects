@@ -3,14 +3,13 @@ services:
   jupyter:
     image: ${USERNAME}/datalabframework:latest
     command: >
-      sh -c "cd /home/jovyan/datalabframework &&
+      sh -c "cd /home/jovyan/work/datalabframework &&
              make develop &&
-             cd /home/jovyan &&
+             cd /home/jovyan/work/demos/${DEMO}/demo &&
              start.sh jupyter lab"
     volumes:
-      - ${PROJECTDIR}:/home/jovyan/demo
+      - ${WORKDIR}:/home/jovyan/work
       - ./conf:/conf
-      - ${ROOTPATH}/datalabframework:/home/jovyan/datalabframework
     ports: ["8888:8888"]
     environment:
       SPARK_CONF_DIR: /conf

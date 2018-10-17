@@ -54,8 +54,8 @@ case $1 in
       if [ -e $composefile ]
       then
         USERNAME=${USERNAME:=${USER}} \
-        PROJECTDIR=${PROJECTDIR:=$(pwd)} \
-        ROOTPATH=$ROOTPATH \
+        WORKDIR=${WORKDIR:=$(pwd)} \
+        DEMO=${DEMO:=minimal} \
         docker-compose -f $composefile up -d
         retval=0
       else
@@ -94,12 +94,28 @@ case $1 in
   --exec)
     composefile=$ROOTPATH/docker/compose/$2/docker-compose.yml
     running=$(docker ps -qf name=$2)
-    if [ -e $composefile ] && [ -e $running ]
+
+    if [ "$2" = "jupyter-dlf" ] || [ "$2" = "jupyter-dev" ]
     then
-        USERNAME=${USERNAME:=${USER}} \
-        PROJECTDIR=${PROJECTDIR:=$(pwd)} \
-        ROOTPATH=$ROOTPATH \
-        docker-compose -f $composefile exec $2 /bin/bash -c "$3"
+      servicename=jupyter
+    else
+      servicename=$2
+    fi
+
+    echo $running running
+    echo "$composefile"
+    echo $servicename
+
+    if [ -e $composefile ] && [ -n "$running" ]
+    then
+      echo yes
+      USERNAME=${USERNAME:=${USER}} \
+      WORKDIR=${WORKDIR:=$(pwd)} \
+      DEMO=${DEMO:=minimal} \
+      docker-compose -f $composefile exec ${servicename} /bin/bash -c "$3"
+      echo done
+    else
+      echo 'nope!...'
     fi
     ;;
   --down)
@@ -110,13 +126,13 @@ case $1 in
       if [ -e $composefile ]
       then
         USERNAME=${USERNAME:=${USER}} \
-        PROJECTDIR=${PROJECTDIR:=$(pwd)} \
-        ROOTPATH=$ROOTPATH \
+        WORKDIR=${WORKDIR:=$(pwd)} \
+        DEMO=${DEMO:=minimal} \
         docker-compose -f $composefile down
 
         USERNAME=${USERNAME:=${USER}} \
-        PROJECTDIR=${PROJECTDIR:=$(pwd)} \
-        ROOTPATH=$ROOTPATH \
+        WORKDIR=${WORKDIR:=$(pwd)} \
+        DEMO=${DEMO:=minimal} \
         docker-compose -f $composefile rm
         retval=0
       else
