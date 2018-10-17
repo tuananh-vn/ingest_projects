@@ -68,5 +68,7 @@ RUN conda clean -tipsy && \
         fix-permissions $CONDA_DIR && \
         fix-permissions /home/$NB_USER
 
+RUN echo 'that is all folks'
+
 # Ready to go: switch to user $NB_USER
 USER $NB_USER
