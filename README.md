@@ -12,9 +12,10 @@ This demos require the following tools to be installed
 
 Please refer to the links for the installation
 
-### Build the docker images locally
+### Build the docker images
 
-before getting started with the demos, build the images typing `make build`
+Docker images are on dockerhub.
+Look at the `datalabframework-docker` repo for more info
 
 ### How to run the demos
 
