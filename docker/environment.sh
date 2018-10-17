@@ -15,8 +15,8 @@ then
   exit 1
 fi
 
-# first argument is empty, or incorrect # of arguments hint for help
-if [ $# -eq 0 ] || [ "$4" ]; then
+# first argument is empty hint for help
+if [ $# -eq 0 ]; then
   echo $prefix "type '$0 -h' for help"
   exit 1
 fi
@@ -47,36 +47,40 @@ case $1 in
     retval=0
     ;;
   --up)
-    composefile=$ROOTPATH/docker/compose/$2/docker-compose.yml
-    if [ -e $composefile ]
-    then
-      REGISTRY=${REGISTRY:='localhost:5000'} \
-      USERNAME=${USERNAME:=${USER}} \
-      IMAGENAME=${IMAGENAME:=datalabframework} \
-      IMAGETAG=${IMAGETAG:=latest} \
-      PROJECTDIR=${PROJECTDIR:=$(pwd)} \
-      docker-compose -f $composefile up -d
-      retval=0
-    else
-      echo $prefix compose group \'$2\' not found
-      retval=1
-    fi
+    for COMPOSEGROUP in ${@:2}
+    do
+      composefile=$ROOTPATH/docker/compose/$2/docker-compose.yml
+      echo Bringing up: $COMPOSEGROUP
+      if [ -e $composefile ]
+      then
+        USERNAME=${USERNAME:=${USER}} \
+        PROJECTDIR=${PROJECTDIR:=$(pwd)} \
+        ROOTPATH=$ROOTPATH \
+        docker-compose -f $composefile up -d
+        retval=0
+      else
+        echo $prefix compose group \'$2\' not found
+        retval=1
+      fi
+    done
     ;;
   --interactive)
     composefile=$ROOTPATH/docker/compose/$2/docker-compose.yml
     if [ -e $composefile ]
     then
-      if [ "$2" = "jupyter" ]
+      if [ "$2" = "jupyter-dlf" ] || [ "$2" = "jupyter-dev" ]
       then
-        for I in 1 2 3
+        # wait up to 30 secs
+        for I in 1 2 3 4 5 6
         do
-          log=$(docker-compose -f $composefile logs jupyter 2>&1 | grep ?token= | head -n 1)
+          log=$(docker-compose -f $composefile logs 2>&1 | grep ?token= | head -n 1)
           token=$(echo $log | sed '/token=/!{q100}; {s/.*token=\(.*\)/\1/}')
           if [ ! "$log" = "$token" ]
           then
             sensible-browser http://localhost:8888/lab?token=${token}
             break;
           else
+            echo "waiting for jupyter service to start ..."
             sleep 5
           fi
         done
@@ -89,39 +93,37 @@ case $1 in
     ;;
   --exec)
     composefile=$ROOTPATH/docker/compose/$2/docker-compose.yml
-    if [ -e $composefile ]
+    running=$(docker ps -qf name=$2)
+    if [ -e $composefile ] && [ -e $running ]
     then
-        REGISTRY=${REGISTRY:='localhost:5000'} \
         USERNAME=${USERNAME:=${USER}} \
-        IMAGENAME=${IMAGENAME:=datalabframework} \
-        IMAGETAG=${IMAGETAG:=latest} \
         PROJECTDIR=${PROJECTDIR:=$(pwd)} \
+        ROOTPATH=$ROOTPATH \
         docker-compose -f $composefile exec $2 /bin/bash -c "$3"
-        #'cd /home/$NB_USER/demo/test && make'
     fi
     ;;
   --down)
-    composefile=$ROOTPATH/docker/compose/$2/docker-compose.yml
-    if [ -e $composefile ]
-    then
-      REGISTRY=${REGISTRY:='localhost:5000'} \
-      USERNAME=${USERNAME:=${USER}} \
-      IMAGENAME=${IMAGENAME:=datalabframework} \
-      IMAGETAG=${IMAGETAG:=latest} \
-      PROJECTDIR=${PROJECTDIR:=$(pwd)} \
-      docker-compose -f $composefile down
+    for COMPOSEGROUP in ${@:2}
+    do
+      composefile=$ROOTPATH/docker/compose/$COMPOSEGROUP/docker-compose.yml
+      echo Bringing down: $COMPOSEGROUP
+      if [ -e $composefile ]
+      then
+        USERNAME=${USERNAME:=${USER}} \
+        PROJECTDIR=${PROJECTDIR:=$(pwd)} \
+        ROOTPATH=$ROOTPATH \
+        docker-compose -f $composefile down
 
-      REGISTRY=${REGISTRY:='localhost:5000'} \
-      USERNAME=${USERNAME:=${USER}} \
-      IMAGENAME=${IMAGENAME:=datalabframework} \
-      IMAGETAG=${IMAGETAG:=latest} \
-      PROJECTDIR=${PROJECTDIR:=$(pwd)} \
-      docker-compose -f $composefile rm
-      retval=0
-    else
-      echo $prefix compose group \'$2\' not found
-      retval=1
-    fi
+        USERNAME=${USERNAME:=${USER}} \
+        PROJECTDIR=${PROJECTDIR:=$(pwd)} \
+        ROOTPATH=$ROOTPATH \
+        docker-compose -f $composefile rm
+        retval=0
+      else
+        echo $prefix compose group \'$COMPOSEGROUP\' not found
+        retval=1
+      fi
+    done
     ;;
   *)
     echo $prefix "wrong argument $1"

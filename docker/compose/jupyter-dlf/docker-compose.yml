@@ -2,7 +2,7 @@ version: '3.5'
 services:
   jupyter:
     image: ${REGISTRY}/${USERNAME}/${IMAGENAME}:${IMAGETAG}
-    command: start.sh jupyter lab
+    command: cd /home/jovyan/demo && start.sh jupyter lab
     volumes:
       - ${PROJECTDIR}:/home/jovyan/demo
       - ./conf:/conf

@@ -1,44 +1,10 @@
 SHELL=/bin/bash
 
-DEMOPATH = $(shell cd demo && pwd)
-ROOTPATH = $(shell cd ../../ && pwd)
+DOCKERENV = $(shell cd ../../ && pwd)/docker/environment.sh
+STATE ?= up
 
-up:
-	# minimal setup
-	$(ROOTPATH)/docker/environment.sh --up network
-	$(ROOTPATH)/docker/environment.sh --up registry
+set-state:
+	# demo specific containers
+	$(DOCKERENV) --$(STATE) mysql hdfs spark
 
-	# create the datalabframework image if required
-	cd $(ROOTPATH)/docker/images && make
-
-	# >> extra components go here <<
-	$(ROOTPATH)/docker/environment.sh --up mysql
-	$(ROOTPATH)/docker/environment.sh --up hdfs
-	$(ROOTPATH)/docker/environment.sh --up spark
-
-	# start jupyter
-	PROJECTDIR=$(DEMOPATH) $(ROOTPATH)/docker/environment.sh --up jupyter
-
-run: up
-	$(ROOTPATH)/docker/environment.sh --interactive jupyter
-
-test: up
-	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo/test && make'
-	$(ROOTPATH)/docker/environment.sh --exec jupyter 'cd demo/test && make clean'
-
-regression:
-		make test
-		make down
-		make clean
-
-down:
-	$(ROOTPATH)/docker/environment.sh --down jupyter
-	# >> extra components go here <<
-	$(ROOTPATH)/docker/environment.sh --down mysql
-	$(ROOTPATH)/docker/environment.sh --down hdfs
-	$(ROOTPATH)/docker/environment.sh --down spark
-	$(ROOTPATH)/docker/environment.sh --down registry
-	$(ROOTPATH)/docker/environment.sh --down network
-
-.DEFAULT_GOAL := run
-.PHONY: run test regression up down clean
+.PHONY: set-state

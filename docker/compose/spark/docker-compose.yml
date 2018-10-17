@@ -2,7 +2,7 @@ version: '3.5'
 services:
 
   spark-master:
-    image: ${REGISTRY}/${USERNAME}/${IMAGENAME}:${IMAGETAG}
+    image: ${USERNAME}/pyspark-notebook:latest
     command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.master.Master -h spark-master
     hostname: spark-master
     user: root
@@ -19,7 +19,7 @@ services:
      - datalabframework
 
   spark-worker-1:
-    image: ${REGISTRY}/${USERNAME}/${IMAGENAME}:${IMAGETAG}
+    image: ${USERNAME}/pyspark-notebook:latest
     command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     hostname: spark-worker-1
     user: root
@@ -38,7 +38,7 @@ services:
      - datalabframework
 
   spark-worker-2:
-    image: ${REGISTRY}/${USERNAME}/${IMAGENAME}:${IMAGETAG}
+    image: ${USERNAME}/pyspark-notebook:latest
     command: /usr/local/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
     hostname: spark-worker-2
     user: root
