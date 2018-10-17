@@ -3,7 +3,7 @@ SHELL=/bin/bash
 PROJECT_ROOTPATH = $(shell cd .. && pwd)
 
 demo:
-	datalabframework run $(PROJECT_ROOTPATH)/src/main.ipynb
+	cd $(PROJECT_ROOTPATH)/src && datalabframework run main.ipynb
 
 clean:
 	find $(PROJECT_ROOTPATH) -name '.ipynb_checkpoints' -exec rm -rf  {} +

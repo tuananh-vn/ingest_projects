@@ -49,7 +49,7 @@ case $1 in
   --up)
     for COMPOSEGROUP in ${@:2}
     do
-      composefile=$ROOTPATH/docker/compose/$2/docker-compose.yml
+      composefile=$ROOTPATH/docker/compose/${COMPOSEGROUP}/docker-compose.yml
       echo Bringing up: $COMPOSEGROUP
       if [ -e $composefile ]
       then
@@ -59,7 +59,7 @@ case $1 in
         docker-compose -f $composefile up -d
         retval=0
       else
-        echo $prefix compose group \'$2\' not found
+        echo $prefix compose group \'${COMPOSEGROUP}\' not found
         retval=1
       fi
     done

@@ -6,7 +6,7 @@ DOCKERENV = $(ROOTDIR)/docker/environment.sh
 DEMO ?= minimal
 DEMODIR = $(shell cd demos/$(DEMO) && pwd)
 
-REGRESSION_DEMOS = $(shell ls demos)
+REGRESSION_DEMOS = minimal basic mysql-hdfs
 
 #two modes: dlf and dev
 MODE ?= dlf
@@ -49,4 +49,4 @@ demos:
 
 .DEFAULT_GOAL := run
 .PHONY: build run test regression up down demos $(REGRESSION_DEMOS)
-#.SILENT: build run test regression up down demos $(REGRESSION_DEMOS)
+.SILENT: build run test regression up down demos $(REGRESSION_DEMOS)
