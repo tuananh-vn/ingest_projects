@@ -17,7 +17,7 @@ build:
 up:
 	# network & containers
 	$(DOCKERENV) --up network
-	cd $(DEMODIR) && make STATE=up
+	cat $(DEMODIR)/docker.env | sed '/^#/ d' | paste -s | xargs $(DOCKERENV) --up
 
 	#jupyter
 	WORKDIR=$(ROOTDIR) DEMO=$(DEMO) $(DOCKERENV) --up jupyter-$(MODE)
@@ -27,6 +27,7 @@ run: up
 	$(DOCKERENV) --interactive jupyter-$(MODE)
 
 test: up
+	echo $(DOCKERENV) --exec jupyter-$(MODE) "cd /home/jovyan/work/demos/$(DEMO)/demo/test && make"
 	$(DOCKERENV) --exec jupyter-$(MODE) "cd /home/jovyan/work/demos/$(DEMO)/demo/test && make"
 
 $(REGRESSION_DEMOS):
@@ -39,13 +40,15 @@ regression: $(REGRESSION_DEMOS)
 down:
 	$(DOCKERENV) --exec jupyter-$(MODE) "cd /home/jovyan/work/demos/$(DEMO)/demo/test && make clean"
 	$(DOCKERENV) --down jupyter-dev jupyter-dlf
-
-	cd $(DEMODIR) && make STATE=down
+	cat $(DEMODIR)/docker.env | sed '/^#/d' | paste -s | xargs $(DOCKERENV) --down
 	$(DOCKERENV) --down network
 
-demos:
+list-demos:
 	echo list of demos:
 	ls -1 demos
+
+list-components:
+	$(DOCKERENV) --list
 
 .DEFAULT_GOAL := run
 .PHONY: build run test regression up down demos $(REGRESSION_DEMOS)

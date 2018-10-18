@@ -25,7 +25,7 @@ type `make demos` to print the list of the available demos.
 #### Select your demo
 
 select a demo by adding `DEMO=<name of the demo>` to the make command.
-List the available demos by typing `make demos`
+List the available demos by typing `make list-demos`
 
 For example, if the selected demo is `basic`
 

@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   jupyter:
-    image: ${USERNAME}/datalabframework:latest
+    image: ${USERNAME}/pyspark-notebook:latest
     command: >
       sh -c "cd /home/jovyan/work/datalabframework &&
              make develop &&

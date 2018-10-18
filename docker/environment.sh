@@ -102,20 +102,14 @@ case $1 in
       servicename=$2
     fi
 
-    echo $running running
-    echo "$composefile"
-    echo $servicename
-
     if [ -e $composefile ] && [ -n "$running" ]
     then
-      echo yes
       USERNAME=${USERNAME:=${USER}} \
       WORKDIR=${WORKDIR:=$(pwd)} \
       DEMO=${DEMO:=minimal} \
       docker-compose -f $composefile exec ${servicename} /bin/bash -c "$3"
-      echo done
     else
-      echo 'nope!...'
+      echo "service $servicename: not found or not running"
     fi
     ;;
   --down)
