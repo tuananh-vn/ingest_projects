@@ -1,5 +1,5 @@
 ---
-run: default
+profile: default
 
 # application specific variables
 # can be set to be run dependent
@@ -19,16 +19,20 @@ providers:
         read:
             cache: True
             repartition: 4
-    ingest:
+        filter:
+            policy: date
+            column: last_update
+            start_date: '2006-02-15'
+            window: '1 days'
+            
+    target:
         service: hdfs
         hostname: hdfs-nn
         path: /data/ingest
         format: parquet
-        # new feature: read/write options
         write:
             coalesce: 2
             options:
-                partitionBy: ['date']
                 mode: append
 
 engines:
