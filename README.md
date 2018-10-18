@@ -46,3 +46,17 @@ if developing/updateing the demos, run the demos in background mode and check th
 ### Develop
 
 if you wish to develop the datalabframework library, this repo acts as integration test suite. add `MODE=dev` to the make commands, for instance: `make run MODE=dev` and `make regression MODE=dev`. This will start the jupyter notebook with the datalabframework package mounted in editable mode.
+
+To update the framework from remote use:  
+`git pull && git submodule foreach git pull https://github.com/natbusa/datalabframework master`
+
+if you are working on the framework:  
+fork the framework, then pull from your own fork:  
+`git pull && git submodule foreach git pull https://github.com/<yourusername>/datalabframework master`
+
+also consider installing the following submodule aliases:
+```
+$ git config alias.sdiff '!'"git diff && git submodule foreach 'git diff'"
+$ git config alias.spush 'push --recurse-submodules=on-demand'
+$ git config alias.supdate 'submodule update --remote --merge'
+```
