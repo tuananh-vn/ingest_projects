@@ -31,6 +31,9 @@ resources:
     film_text:
         path: film_text
         provider: source
+        read:
+            filter:
+                policy: none
     inventory:
         path: inventory
         provider: source

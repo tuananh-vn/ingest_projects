@@ -19,11 +19,11 @@ providers:
         read:
             cache: True
             repartition: 4
-        filter:
-            policy: date
-            column: last_update
-            start_date: '2006-02-15'
-            window: '1 days'
+            filter:
+                policy: date
+                column: last_update
+                end_date: '2006-02-16'
+                window: '1 days'
             
     target:
         service: hdfs
