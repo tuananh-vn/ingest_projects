@@ -6,7 +6,7 @@ services:
       sh -c "cd /home/jovyan/work/datalabframework &&
              make develop &&
              cd /home/jovyan/work/demos/${DEMO}/demo &&
-             start.sh jupyter lab"
+             conda env -q -n base -f binder/environment.yml; start.sh jupyter lab"
     volumes:
       - ${WORKDIR}:/home/jovyan/work
       - ./conf:/conf
