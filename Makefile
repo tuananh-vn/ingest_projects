@@ -50,6 +50,10 @@ list-demos:
 list-components:
 	$(DOCKERENV) --list
 
+clean:
+	find $(PROJECT_ROOTPATH) -name '.ipynb_checkpoints' -exec rm -rf  {} +
+	find $(PROJECT_ROOTPATH) -name 'spark-warehouse' -exec rm -rf {} +
+
 .DEFAULT_GOAL := run
 .PHONY: build run test regression up down demos $(REGRESSION_DEMOS)
 .SILENT: build run test regression up down demos $(REGRESSION_DEMOS)
